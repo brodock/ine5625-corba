@@ -1,0 +1,52 @@
+module banco {
+
+  typedef unsigned long conta; 
+
+  typedef double valor; 
+  
+  const string nome_banco = "UFSC";
+  const string moeda = "R$"; 
+
+  enum aplicacao { poupanca, fundo_acoes, renda_fixa };
+
+  struct transacao { 
+    unsigned long data; // Formato: ddmmyyyy
+    string<12>    descricao; 
+    valor         quantia; 
+  };
+
+  typedef sequence <transacao> transacoes; 
+ 
+  exception conta_inval { conta c; };
+  exception saldo_insuf { valor saldo; };
+
+  interface auto_atendimento {
+
+    readonly attribute string boas_vindas;
+
+    valor saldo ( in conta c ) 
+          raises ( conta_inval );
+
+    void extrato ( in conta c, 
+         out transacoes t, out valor saldo ) 
+         raises ( conta_inval );  
+
+    void tranferencia ( in conta origem, 
+         in conta destino, in valor v )
+         raises ( conta_inval, saldo_insuf );  
+
+    void investimento ( in conta c, 
+         in aplicacao apl, in valor v ) 
+         raises ( conta_inval, saldo_insuf ); 
+  };
+
+  interface caixa_eletronico: auto_atendimento {
+
+    void saque ( in conta c, in valor v ) 
+         raises ( conta_inval, saldo_insuf );
+
+  }; 
+
+  // ...
+
+};
