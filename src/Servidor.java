@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package servidor;
+
 
 import org.omg.CORBA.*;
 import org.omg.CORBA.Object;
@@ -21,10 +21,10 @@ public class Servidor {
             poa.the_POAManager().activate();
 
             // Instancia um objeto da classe GoodDayImpl
-            GoodDayImpl gd = new GoodDayImpl("aaa");
+            ServicoEventosImpl servicoEventos = new ServicoEventosImpl();
 
             // Transforma o objeto java HelloWorld (hw) num objeto CORBA genérico (o)
-            Object objCORBA = poa.servant_to_reference(gd);
+            Object objCORBA = poa.servant_to_reference(servicoEventos);
 
             // Obtém a referência (endereço) do servidor de nomes (NameService)
             // Essa tarefa é realizada pelo ORB (orb.resolve_initial_references)
