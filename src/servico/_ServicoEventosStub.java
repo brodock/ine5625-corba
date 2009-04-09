@@ -1,3 +1,5 @@
+package servico;
+
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -42,12 +44,12 @@ public class _ServicoEventosStub extends ObjectImpl implements ServicoEventos {
         }
     } // MeRegistre
 
-    public void ObterListaEventos(ServicoEventosPackage.listaEventosHolder lista) {
+    public void ObterListaEventos(servico.listaEventosHolder lista) {
         InputStream $in = null;
         try {
             OutputStream $out = _request("ObterListaEventos", true);
             $in = _invoke($out);
-            lista.value = ServicoEventosPackage.listaEventosHelper.read($in);
+            lista.value = servico.listaEventosHelper.read($in);
             return;
         } catch (ApplicationException $ex) {
             $in = $ex.getInputStream();

@@ -1,3 +1,5 @@
+package servico;
+
 
 import org.omg.CORBA.TypeCode;
 import org.omg.CORBA.portable.InputStream;

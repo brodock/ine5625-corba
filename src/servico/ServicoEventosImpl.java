@@ -1,5 +1,7 @@
+package servico;
 
-import ServicoEventosPackage.listaEventosHolder;
+
+import servico.listaEventosHolder;
 import org.omg.CORBA.Object;
 import org.omg.CORBA.StringHolder;
 

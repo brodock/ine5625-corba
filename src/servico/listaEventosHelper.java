@@ -1,4 +1,4 @@
-package ServicoEventosPackage;
+package servico;
 
 /**
  * ServicoEventosPackage/listaEventosHelper.java .
@@ -26,7 +26,7 @@ abstract public class listaEventosHelper {
         if (__typeCode == null) {
             __typeCode = org.omg.CORBA.ORB.init().create_string_tc(0);
             __typeCode = org.omg.CORBA.ORB.init().create_sequence_tc(0, __typeCode);
-            __typeCode = org.omg.CORBA.ORB.init().create_alias_tc(ServicoEventosPackage.listaEventosHelper.id(), "listaEventos", __typeCode);
+            __typeCode = org.omg.CORBA.ORB.init().create_alias_tc(servico.listaEventosHelper.id(), "listaEventos", __typeCode);
         }
         return __typeCode;
     }

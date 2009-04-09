@@ -1,3 +1,5 @@
+package servico;
+
 
 /**
  * ServicoEventosPOA.java .
@@ -42,10 +44,10 @@ public abstract class ServicoEventosPOA extends org.omg.PortableServer.Servant
 
             case 1: // ServicoEventos/ObterListaEventos
             {
-                ServicoEventosPackage.listaEventosHolder lista = new ServicoEventosPackage.listaEventosHolder();
+                servico.listaEventosHolder lista = new servico.listaEventosHolder();
                 this.ObterListaEventos(lista);
                 out = $rh.createReply();
-                ServicoEventosPackage.listaEventosHelper.write(out, lista.value);
+                servico.listaEventosHelper.write(out, lista.value);
                 break;
             }
 

@@ -1,3 +1,5 @@
+package servico;
+
 
 import org.omg.CORBA.*;
 import org.omg.CORBA.Object;

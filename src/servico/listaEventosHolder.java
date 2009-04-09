@@ -1,4 +1,4 @@
-package ServicoEventosPackage;
+package servico;
 
 /**
  * ServicoEventosPackage/listaEventosHolder.java .
@@ -18,14 +18,14 @@ public final class listaEventosHolder implements org.omg.CORBA.portable.Streamab
     }
 
     public void _read(org.omg.CORBA.portable.InputStream i) {
-        value = ServicoEventosPackage.listaEventosHelper.read(i);
+        value = servico.listaEventosHelper.read(i);
     }
 
     public void _write(org.omg.CORBA.portable.OutputStream o) {
-        ServicoEventosPackage.listaEventosHelper.write(o, value);
+        servico.listaEventosHelper.write(o, value);
     }
 
     public org.omg.CORBA.TypeCode _type() {
-        return ServicoEventosPackage.listaEventosHelper.type();
+        return servico.listaEventosHelper.type();
     }
 }

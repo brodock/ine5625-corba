@@ -1,3 +1,5 @@
+package servico;
+
 
 import org.omg.CORBA.Object;
 import org.omg.CORBA.portable.IDLEntity;
