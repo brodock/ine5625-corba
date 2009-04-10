@@ -1,4 +1,4 @@
-package servico;
+package cliente;
 
 
 /**

@@ -1,6 +1,7 @@
-package servico;
+package cliente;
 
 
+import cliente.ClienteEventos;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;

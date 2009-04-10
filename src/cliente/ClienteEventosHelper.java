@@ -1,4 +1,6 @@
-package servico;
+package cliente;
+
+import servico.*;
 
 
 /**
