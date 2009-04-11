@@ -1,7 +1,5 @@
 package cliente;
 
-
-import cliente.ClienteEventos;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -15,7 +13,6 @@ import org.omg.CORBA.portable.InputStream;
 import org.omg.CORBA.portable.ObjectImpl;
 import org.omg.CORBA.portable.OutputStream;
 import org.omg.CORBA.portable.RemarshalException;
-
 
 /**
  * _ClienteEventosStub.java .

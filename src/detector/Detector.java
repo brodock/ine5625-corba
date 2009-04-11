@@ -1,5 +1,6 @@
 package detector;
 
+import com.sun.tools.javadoc.Messager.ExitJavadoc;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -44,13 +45,14 @@ public class Detector {
 
             // Obtém o objeto CORBA (genérico) do servidor HelloWorld
 			// É o servidor de nomes que fornece essa referência (resolve)
-			org.omg.CORBA.Object o = nc.resolve(nc.to_name("ServicoEventos"));
+			org.omg.CORBA.Object o = nc.resolve(nc.to_name("ServicoEventos.corba"));
 
 			// Transforma o objeto CORBA genérico num objeto CORBA ServicoEventos
-			servico = ServicoEventosHelper.narrow(o);
+			this.servico = ServicoEventosHelper.narrow(o);
 			
 		} catch (Exception e) {
 			e.printStackTrace();
+            this.servico = null;
 		}
     }
 
@@ -85,10 +87,15 @@ public class Detector {
     }
 
     private void AtivarEvento() {
+        
+        String evento = null;
+        this.servico.CadastrarEvento(evento);
         throw new UnsupportedOperationException("Not yet implemented");
     }
 
     private void DefinirEvento() {
+        String evento = null;
+        this.servico.NovoEvento(evento);
         throw new UnsupportedOperationException("Not yet implemented");
     }
 }

@@ -25,7 +25,7 @@ public class Servidor {
             // Instancia um objeto da classe GoodDayImpl
             ServicoEventosImpl servicoEventos = new ServicoEventosImpl();
 
-            // Transforma o objeto java HelloWorld (hw) num objeto CORBA genérico (o)
+            // Transforma o objeto java ServicoEventosImpl (servicoEventos) num objeto CORBA genérico (objCORBA)
             Object objCORBA = poa.servant_to_reference(servicoEventos);
 
             // Obtém a referência (endereço) do servidor de nomes (NameService)
@@ -33,7 +33,7 @@ public class Servidor {
             NamingContextExt nc = NamingContextExtHelper.narrow(orb.resolve_initial_references("NameService"));
 
             // Registra a referência objCORBA no servidor de nomes usando o bind (pode ser tb com rebind)
-            nc.rebind(nc.to_name("Hello.example"), objCORBA);
+            nc.rebind(nc.to_name("ServicoEventos.corba"), objCORBA);
 
             orb.run();
         } catch (Exception e) {
