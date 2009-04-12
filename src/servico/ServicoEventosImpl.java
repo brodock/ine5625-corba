@@ -1,6 +1,9 @@
 package servico;
 
 
+import cliente.ClienteEventos;
+import java.util.ArrayList;
+import java.util.HashMap;
 import servico.listaEventosHolder;
 import org.omg.CORBA.Object;
 import org.omg.CORBA.StringHolder;
@@ -16,6 +19,8 @@ import org.omg.CORBA.StringHolder;
  */
 public class ServicoEventosImpl extends ServicoEventosPOA {
 
+    private HashMap<String, ArrayList> clientes_eventos = new HashMap<String, ArrayList>();
+
     /**
      * Registra um objeto cliente para receber Eventos do tipo
      * especificado.
@@ -25,7 +30,19 @@ public class ServicoEventosImpl extends ServicoEventosPOA {
      * @return
      */
     public boolean MeRegistre(Object ref, String evento) {
-        throw new UnsupportedOperationException("Not supported yet.");
+
+        if (this.clientes_eventos.containsKey(evento)) {
+
+            ArrayList lista = (ArrayList) this.clientes_eventos.get(evento);
+            
+            if (lista.contains(ref))
+                return false;
+            else
+                return lista.add(ref);
+
+        }
+        return false;
+        
     }
 
     /**
@@ -36,7 +53,7 @@ public class ServicoEventosImpl extends ServicoEventosPOA {
      * @param lista
      */
     public void ObterListaEventos(listaEventosHolder lista) {
-        throw new UnsupportedOperationException("Not supported yet.");
+       throw new UnsupportedOperationException("Not supported yet.");
     }
 
     /**
@@ -56,7 +73,11 @@ public class ServicoEventosImpl extends ServicoEventosPOA {
      * @return
      */
     public boolean CadastrarEvento(String evento) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        if (!this.clientes_eventos.containsKey(evento)) {
+            this.clientes_eventos.put(evento, new ArrayList(5));
+            return true;
+        }
+        return false;
     }
 
     /**
