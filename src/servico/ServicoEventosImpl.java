@@ -63,7 +63,7 @@ public class ServicoEventosImpl extends ServicoEventosPOA {
         int i = 0;
         while (iter.hasNext()) {
             Map.Entry entry = (Map.Entry) iter.next();
-            eventos[i] = (String) entry.getKey();
+            eventos[i] = (String) entry.toString();
             i++;
         }
 
