@@ -1,10 +1,10 @@
 package servico;
 
-
-import cliente.ClienteEventos;
 import java.util.ArrayList;
 import java.util.HashMap;
-import servico.listaEventosHolder;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
 import org.omg.CORBA.Object;
 import org.omg.CORBA.StringHolder;
 
@@ -12,7 +12,6 @@ import org.omg.CORBA.StringHolder;
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-
 /**
  *
  * @author brodock
@@ -34,15 +33,16 @@ public class ServicoEventosImpl extends ServicoEventosPOA {
         if (this.clientes_eventos.containsKey(evento)) {
 
             ArrayList lista = (ArrayList) this.clientes_eventos.get(evento);
-            
-            if (lista.contains(ref))
+
+            if (lista.contains(ref)) {
                 return false;
-            else
+            } else {
                 return lista.add(ref);
+            }
 
         }
         return false;
-        
+
     }
 
     /**
@@ -53,7 +53,22 @@ public class ServicoEventosImpl extends ServicoEventosPOA {
      * @param lista
      */
     public void ObterListaEventos(listaEventosHolder lista) {
-       throw new UnsupportedOperationException("Not supported yet.");
+        String[] eventos = new String[clientes_eventos.size()];
+        
+        // Recuperar Iterator da chave do hashmap
+        Set set = clientes_eventos.keySet();
+        Iterator iter = set.iterator();
+
+        // Pegar cada item da chave do hashmap e jogar para o array de strings
+        int i = 0;
+        while (iter.hasNext()) {
+            Map.Entry entry = (Map.Entry) iter.next();
+            eventos[i] = (String) entry.getKey();
+            i++;
+        }
+
+        // Repassar a lista de strings de eventos para listaEventosHolder
+        lista.value = eventos;
     }
 
     /**
@@ -89,5 +104,4 @@ public class ServicoEventosImpl extends ServicoEventosPOA {
     public boolean obterEventoQualquer(StringHolder evento) {
         throw new UnsupportedOperationException("Not supported yet.");
     }
-
 }
