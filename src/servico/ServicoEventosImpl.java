@@ -1,5 +1,7 @@
 package servico;
 
+import cliente.ClienteEventos;
+import cliente.ClienteEventosHelper;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -8,17 +10,13 @@ import java.util.Set;
 import org.omg.CORBA.Object;
 import org.omg.CORBA.StringHolder;
 
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 /**
  *
  * @author brodock
  */
 public class ServicoEventosImpl extends ServicoEventosPOA {
 
-    private HashMap<String, ArrayList> clientes_eventos = new HashMap<String, ArrayList>();
+    private HashMap<String, ArrayList<Object>> clientes_eventos = new HashMap<String, ArrayList<Object>>();
 
     /**
      * Registra um objeto cliente para receber Eventos do tipo
@@ -78,7 +76,14 @@ public class ServicoEventosImpl extends ServicoEventosPOA {
      * @return
      */
     public boolean NovoEvento(String evento) {
-        throw new UnsupportedOperationException("Not supported yet.");
+
+        ArrayList<Object> clientes = this.clientes_eventos.get(evento);
+        for (Object cli : clientes) {
+            ClienteEventos cliente = ClienteEventosHelper.narrow(cli);
+            cliente.NovoAlerta(evento);
+        }
+        return true;
+
     }
 
     /**
