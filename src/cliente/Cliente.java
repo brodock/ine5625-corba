@@ -7,6 +7,7 @@ import java.io.InputStreamReader;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.omg.CORBA.ORB;
+import org.omg.CORBA.Object;
 import org.omg.CORBA.StringHolder;
 import org.omg.CosNaming.NamingContextExt;
 import org.omg.CosNaming.NamingContextExtHelper;
@@ -24,16 +25,16 @@ public class Cliente {
 
     private ServicoEventos servico;
     private ClienteEventosImpl cliente;
-    private POA poa;
+    private Object cliente_corba;
 
     public Cliente(String[] args) {
-        System.out.println("Bem vindo ao Cliente eventos aleatórios");
+        System.out.println("Bem vindo ao Cliente eventos aleatorios");
         InicializaCorba(args);
         try {
             MenuPrincipal();
         } catch (IOException ex) {
             Logger.getLogger(Detector.class.getName()).log(Level.SEVERE, null, ex);
-            System.out.println("Falha de IO, por favor reinicie a aplicação");
+            System.out.println("Falha de IO, por favor reinicie a aplicacao");
         }
     }
 
@@ -45,7 +46,7 @@ public class Cliente {
             ORB orb = ORB.init(args, null);
 
             // Ativa o POA
-            poa = POAHelper.narrow(orb.resolve_initial_references("RootPOA"));
+            POA poa = POAHelper.narrow(orb.resolve_initial_references("RootPOA"));
             poa.the_POAManager().activate();
 
             // Obtém a referência do servidor de nomes (NameService)
@@ -58,6 +59,8 @@ public class Cliente {
 
             // Transforma o objeto CORBA genérico num objeto CORBA ServicoEventos
             this.servico = ServicoEventosHelper.narrow(o);
+
+            cliente_corba = poa.servant_to_reference(cliente);
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -94,7 +97,7 @@ public class Cliente {
      * Mostra uma lista com eventos disponíveis e depois volta ao menu principal
      */
     private void MostrarListaEventos() {
-        System.out.println("Lista de eventos disponíveis: ");
+        System.out.println("Lista de eventos disponiveis: ");
         listaEventosHolder listaEventos = new listaEventosHolder();
         servico.ObterListaEventos(listaEventos);
         String[] valores = listaEventos.value;
@@ -109,10 +112,14 @@ public class Cliente {
     /**
      * Recebe um evento qualquer disparado e depois volta ao menu principal
      */
+    @SuppressWarnings("empty-statement")
     private void ReceberEventoQualquer() {
 
+        System.out.println("Aguardando evento qualquer...");
         StringHolder eventoQualquer = new StringHolder();
-        this.servico.obterEventoQualquer(eventoQualquer);
+        while(!this.servico.obterEventoQualquer(eventoQualquer)) {
+            System.out.println("falhou... tentando novamente...");
+        }
         String eventoQualquerStr = eventoQualquer.value;
         System.out.println("Evento qualquer recebido: " + eventoQualquerStr);
 
@@ -122,14 +129,19 @@ public class Cliente {
      * Registra para receber informações quando um determinado evento for disparado
      * e depois retorna ao menu principal
      */
-    private void RegistrarEvento() {
+    private void RegistrarEvento() throws IOException {
+        System.out.println("Digite o evento que voce quer receber: ");
+        BufferedReader stdin = new BufferedReader(new InputStreamReader(System.in));
+
+        String comando = stdin.readLine();
+        servico.MeRegistre(cliente_corba, comando);
     }
 
     /**
      * Avisa sobre uma Opção Inválida selecionada no menu principal
      */
     private void msgOpcaoInvalida() {
-        System.out.println("Opção inválida, tente novamente!");
+        System.out.println("Opcao invalida, tente novamente!");
     }
 
     public static void main(String[] args) {

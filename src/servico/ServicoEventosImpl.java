@@ -8,6 +8,8 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.omg.CORBA.Object;
 import org.omg.CORBA.StringHolder;
 
@@ -18,6 +20,8 @@ import org.omg.CORBA.StringHolder;
 public class ServicoEventosImpl extends ServicoEventosPOA {
 
     private HashMap<String, ArrayList<Object>> clientes_eventos = new HashMap<String, ArrayList<Object>>();
+    private String evt;
+    private int count_evt = 0;
 
     /**
      * Registra um objeto cliente para receber Eventos do tipo
@@ -36,7 +40,7 @@ public class ServicoEventosImpl extends ServicoEventosPOA {
             if (lista.contains(ref)) {
                 return false;
             } else {
-                mensagem("Registrando um cliente para evento: "+evento);
+                mensagem("Registrando um cliente para evento: " + evento);
                 return lista.add(ref);
             }
 
@@ -70,7 +74,7 @@ public class ServicoEventosImpl extends ServicoEventosPOA {
         // Repassar a lista de strings de eventos para listaEventosHolder
         lista.value = lista_eventos;
 
-        mensagem("Alguém solicitou a lista de eventos.");
+        mensagem("Alguem solicitou a lista de eventos.");
 
         for (String e : lista_eventos) {
             mensagem(e);
@@ -85,16 +89,26 @@ public class ServicoEventosImpl extends ServicoEventosPOA {
      */
     public boolean NovoEvento(String evento) {
 
+        this.evt = evento;
+        this.count_evt++;
+
         ArrayList<Object> clientes = this.clientes_eventos.get(evento);
         if (clientes != null) {
             for (Object cli : clientes) {
+                try {
+                    Thread.sleep(100L);
+                } catch (InterruptedException ex) {
+                    Logger.getLogger(ServicoEventosImpl.class.getName()).log(Level.SEVERE, null, ex);
+                    mensagem("Erro ao disparar evento: " + evento );
+                    return false;
+                }
                 ClienteEventos cliente = ClienteEventosHelper.narrow(cli);
                 cliente.NovoAlerta(evento);
             }
-            mensagem("Evento: "+evento+" foi disparado para os clientes inscritos.");
+            mensagem("Evento: " + evento + " foi disparado para os clientes inscritos.");
             return true;
         } else {
-            mensagem("Tentou disparar evento: "+evento+" mas o mesmo não existe!");
+            mensagem("Tentou disparar evento: " + evento + " mas o mesmo nao existe!");
             return false;
         }
 
@@ -114,7 +128,7 @@ public class ServicoEventosImpl extends ServicoEventosPOA {
             mensagem("Evento \"" + evento + "\" cadastrado!");
             return true;
         }
-        mensagem("Impossível cadastrar evento: " + evento + " pois o mesmo já deve estar cadastrado!");
+        mensagem("Impossivel cadastrar evento: " + evento + " pois o mesmo ja deve estar cadastrado!");
         return false;
     }
 
@@ -125,7 +139,20 @@ public class ServicoEventosImpl extends ServicoEventosPOA {
      * @return
      */
     public boolean obterEventoQualquer(StringHolder evento) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        int sequencia = this.count_evt;
+        int sequencia_nova = sequencia;
+
+        while (sequencia == sequencia_nova) {
+            try {
+                Thread.sleep(150L);
+                sequencia_nova = this.count_evt;
+            } catch (InterruptedException ex) {
+                Logger.getLogger(ServicoEventosImpl.class.getName()).log(Level.SEVERE, null, ex);
+                return false;
+            }
+        }
+        evento.value = new String(this.evt);
+        return true;
     }
 
     private void mensagem(String texto) {
