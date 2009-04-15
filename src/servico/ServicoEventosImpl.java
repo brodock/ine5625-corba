@@ -35,6 +35,7 @@ public class ServicoEventosImpl extends ServicoEventosPOA {
             if (lista.contains(ref)) {
                 return false;
             } else {
+                mensagem("Registrando um cliente para evento: "+evento);
                 return lista.add(ref);
             }
 
@@ -52,7 +53,7 @@ public class ServicoEventosImpl extends ServicoEventosPOA {
      */
     public void ObterListaEventos(listaEventosHolder lista) {
         String[] eventos = new String[clientes_eventos.size()];
-        
+
         // Recuperar Iterator da chave do hashmap
         Set set = clientes_eventos.keySet();
         Iterator iter = set.iterator();
@@ -67,6 +68,7 @@ public class ServicoEventosImpl extends ServicoEventosPOA {
 
         // Repassar a lista de strings de eventos para listaEventosHolder
         lista.value = eventos;
+        mensagem("Alguém solicitou a lista de eventos.");
     }
 
     /**
@@ -78,11 +80,17 @@ public class ServicoEventosImpl extends ServicoEventosPOA {
     public boolean NovoEvento(String evento) {
 
         ArrayList<Object> clientes = this.clientes_eventos.get(evento);
-        for (Object cli : clientes) {
-            ClienteEventos cliente = ClienteEventosHelper.narrow(cli);
-            cliente.NovoAlerta(evento);
+        if (clientes != null) {
+            for (Object cli : clientes) {
+                ClienteEventos cliente = ClienteEventosHelper.narrow(cli);
+                cliente.NovoAlerta(evento);
+            }
+            mensagem("Evento: "+evento+" foi disparado para os clientes inscritos.");
+            return true;
+        } else {
+            mensagem("Tentou disparar evento: "+evento+" mas o mesmo não existe!");
+            return false;
         }
-        return true;
 
     }
 
@@ -93,10 +101,14 @@ public class ServicoEventosImpl extends ServicoEventosPOA {
      * @return
      */
     public boolean CadastrarEvento(String evento) {
+
+        mensagem("Tentando cadastrar um novo evento: " + evento);
         if (!this.clientes_eventos.containsKey(evento)) {
             this.clientes_eventos.put(evento, new ArrayList(5));
+            mensagem("Evento \"" + evento + "\" cadastrado!");
             return true;
         }
+        mensagem("Impossível cadastrar evento: " + evento + " pois o mesmo já deve estar cadastrado!");
         return false;
     }
 
@@ -108,5 +120,9 @@ public class ServicoEventosImpl extends ServicoEventosPOA {
      */
     public boolean obterEventoQualquer(StringHolder evento) {
         throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    private void mensagem(String texto) {
+        System.out.println(texto);
     }
 }

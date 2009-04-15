@@ -7,7 +7,9 @@ package cliente;
 public class ClienteEventosImpl extends ClienteEventosPOA {
 
     public boolean NovoAlerta(String evento) {
-        throw new UnsupportedOperationException("Not supported yet.");
+
+        System.out.println("["+evento+"] recebido");
+        return true;
     }
 
 }
