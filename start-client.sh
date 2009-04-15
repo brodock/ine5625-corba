@@ -1,2 +1,3 @@
 #!/bin/bash
-java build/classes/cliente/Cliente -ORBInitialPort 2500 -ORBInitialHost localhost
+cd build/classes
+java cliente/Cliente -ORBInitialPort 2500 -ORBInitialHost localhost
