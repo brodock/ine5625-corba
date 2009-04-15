@@ -3,6 +3,8 @@ package detector;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.lang.String;
+import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.omg.CosNaming.NamingContextExt;
@@ -16,6 +18,7 @@ import servico.*;
 public class Detector {
 
     private ServicoEventos servico;
+    private ArrayList<String> eventos = new ArrayList<String>();
 
     /**
      * Inicializa um detector passando parametros de conexão do CORBA
@@ -34,25 +37,25 @@ public class Detector {
 
     private void InicializaCorba(String[] args) {
         try {
-			
-			// Inicializa o ORB
-			org.omg.CORBA.ORB orb = org.omg.CORBA.ORB.init(args, null);
+
+            // Inicializa o ORB
+            org.omg.CORBA.ORB orb = org.omg.CORBA.ORB.init(args, null);
 
             // Obtém a referência do servidor de nomes (NameService)
-			// Essa tarefa é realizada pelo ORB (resolve_initial_references)
-			NamingContextExt nc = NamingContextExtHelper.narrow(orb.resolve_initial_references("NameService"));
+            // Essa tarefa é realizada pelo ORB (resolve_initial_references)
+            NamingContextExt nc = NamingContextExtHelper.narrow(orb.resolve_initial_references("NameService"));
 
             // Obtém o objeto CORBA (genérico) do servidor HelloWorld
-			// É o servidor de nomes que fornece essa referência (resolve)
-			org.omg.CORBA.Object o = nc.resolve(nc.to_name("ServicoEventos.corba"));
+            // É o servidor de nomes que fornece essa referência (resolve)
+            org.omg.CORBA.Object o = nc.resolve(nc.to_name("ServicoEventos.corba"));
 
-			// Transforma o objeto CORBA genérico num objeto CORBA ServicoEventos
-			this.servico = ServicoEventosHelper.narrow(o);
-			
-		} catch (Exception e) {
-			e.printStackTrace();
+            // Transforma o objeto CORBA genérico num objeto CORBA ServicoEventos
+            this.servico = ServicoEventosHelper.narrow(o);
+
+        } catch (Exception e) {
+            e.printStackTrace();
             this.servico = null;
-		}
+        }
     }
 
     public void MenuPrincipal() throws IOException {
@@ -85,16 +88,22 @@ public class Detector {
         System.exit(0);
     }
 
-    private void AtivarEvento() {
-        
-        String evento = null;
-        this.servico.CadastrarEvento(evento);
-        throw new UnsupportedOperationException("Not yet implemented");
+    private void AtivarEvento() throws IOException {
+
+        System.out.println("Digite o evento que será ativado: ");
+
+        BufferedReader stdin = new BufferedReader(new InputStreamReader(System.in));
+        String comando = stdin.readLine();
+
+        this.servico.NovoEvento(comando);
     }
 
-    private void DefinirEvento() {
-        String evento = null;
-        this.servico.NovoEvento(evento);
-        throw new UnsupportedOperationException("Not yet implemented");
+    private void DefinirEvento() throws IOException {
+        System.out.println("Digite o evento que será adicionado: ");
+
+        BufferedReader stdin = new BufferedReader(new InputStreamReader(System.in));
+        String comando = stdin.readLine();
+
+        this.servico.CadastrarEvento(comando);
     }
 }
