@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import org.omg.CORBA.Object;
 import org.omg.CORBA.StringHolder;
@@ -52,23 +53,28 @@ public class ServicoEventosImpl extends ServicoEventosPOA {
      * @param lista
      */
     public void ObterListaEventos(listaEventosHolder lista) {
-        String[] eventos = new String[clientes_eventos.size()];
+        String[] lista_eventos = new String[clientes_eventos.size()];
 
         // Recuperar Iterator da chave do hashmap
-        Set set = clientes_eventos.keySet();
+        Set<Entry<String, ArrayList<Object>>> set = clientes_eventos.entrySet();
         Iterator iter = set.iterator();
 
         // Pegar cada item da chave do hashmap e jogar para o array de strings
         int i = 0;
         while (iter.hasNext()) {
             Map.Entry entry = (Map.Entry) iter.next();
-            eventos[i] = (String) entry.toString();
+            lista_eventos[i] = (String) entry.getKey();
             i++;
         }
 
         // Repassar a lista de strings de eventos para listaEventosHolder
-        lista.value = eventos;
+        lista.value = lista_eventos;
+
         mensagem("Alguém solicitou a lista de eventos.");
+
+        for (String e : lista_eventos) {
+            mensagem(e);
+        }
     }
 
     /**

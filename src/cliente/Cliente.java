@@ -6,10 +6,15 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.omg.CORBA.ORB;
+import org.omg.CORBA.StringHolder;
 import org.omg.CosNaming.NamingContextExt;
 import org.omg.CosNaming.NamingContextExtHelper;
+import org.omg.PortableServer.POA;
+import org.omg.PortableServer.POAHelper;
 import servico.ServicoEventos;
 import servico.ServicoEventosHelper;
+import servico.listaEventosHolder;
 
 /**
  *
@@ -18,6 +23,8 @@ import servico.ServicoEventosHelper;
 public class Cliente {
 
     private ServicoEventos servico;
+    private ClienteEventosImpl cliente;
+    private POA poa;
 
     public Cliente(String[] args) {
         System.out.println("Bem vindo ao Cliente eventos aleatórios");
@@ -32,9 +39,14 @@ public class Cliente {
 
     private void InicializaCorba(String[] args) {
         try {
+            cliente = new ClienteEventosImpl();
 
             // Inicializa o ORB
-            org.omg.CORBA.ORB orb = org.omg.CORBA.ORB.init(args, null);
+            ORB orb = ORB.init(args, null);
+
+            // Ativa o POA
+            poa = POAHelper.narrow(orb.resolve_initial_references("RootPOA"));
+            poa.the_POAManager().activate();
 
             // Obtém a referência do servidor de nomes (NameService)
             // Essa tarefa é realizada pelo ORB (resolve_initial_references)
@@ -78,23 +90,51 @@ public class Cliente {
 
     }
 
+    /**
+     * Mostra uma lista com eventos disponíveis e depois volta ao menu principal
+     */
     private void MostrarListaEventos() {
-        throw new UnsupportedOperationException("Not yet implemented");
+        System.out.println("Lista de eventos disponíveis: ");
+        listaEventosHolder listaEventos = new listaEventosHolder();
+        servico.ObterListaEventos(listaEventos);
+        String[] valores = listaEventos.value;
+        if (valores != null && valores.length > 0) {
+            for (String valor : valores) {
+                System.out.println(valor);
+            }
+        }
+
     }
 
+    /**
+     * Recebe um evento qualquer disparado e depois volta ao menu principal
+     */
     private void ReceberEventoQualquer() {
-        throw new UnsupportedOperationException("Not yet implemented");
+
+        StringHolder eventoQualquer = new StringHolder();
+        this.servico.obterEventoQualquer(eventoQualquer);
+        String eventoQualquerStr = eventoQualquer.value;
+        System.out.println("Evento qualquer recebido: " + eventoQualquerStr);
+
     }
 
+    /**
+     * Registra para receber informações quando um determinado evento for disparado
+     * e depois retorna ao menu principal
+     */
     private void RegistrarEvento() {
-        throw new UnsupportedOperationException("Not yet implemented");
     }
 
+    /**
+     * Avisa sobre uma Opção Inválida selecionada no menu principal
+     */
     private void msgOpcaoInvalida() {
         System.out.println("Opção inválida, tente novamente!");
     }
 
     public static void main(String[] args) {
+
+        // Carrega o cliente e o resto é com ele!!!
         Cliente cliente = new Cliente(args);
         System.exit(0);
     }

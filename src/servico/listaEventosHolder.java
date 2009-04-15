@@ -18,14 +18,14 @@ public final class listaEventosHolder implements org.omg.CORBA.portable.Streamab
     }
 
     public void _read(org.omg.CORBA.portable.InputStream i) {
-        value = servico.listaEventosHelper.read(i);
+        value = listaEventosHelper.read(i);
     }
 
     public void _write(org.omg.CORBA.portable.OutputStream o) {
-        servico.listaEventosHelper.write(o, value);
+        listaEventosHelper.write(o, value);
     }
 
     public org.omg.CORBA.TypeCode _type() {
-        return servico.listaEventosHelper.type();
+        return listaEventosHelper.type();
     }
 }
