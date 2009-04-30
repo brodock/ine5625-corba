@@ -20,6 +20,7 @@ import org.omg.CORBA.StringHolder;
 public class ServicoEventosImpl extends ServicoEventosPOA {
 
     private HashMap<String, ArrayList<Object>> clientes_eventos = new HashMap<String, ArrayList<Object>>();
+    private ArrayList<Object> detectores = new ArrayList<Object>();
     private String evt;
     private int count_evt = 0;
 
@@ -165,5 +166,10 @@ public class ServicoEventosImpl extends ServicoEventosPOA {
 
     public boolean log(String copiaRequisicao, String evento, Object ref) {
         throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    public boolean RegistraDetector(Object ref) {
+        this.detectores.add(ref);
+        return true;
     }
 }
