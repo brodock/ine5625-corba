@@ -8,4 +8,5 @@ interface ServicoEventos {
    boolean obterEventoQualquer(out string evento);
    boolean checkpoint (in arrayDeBytes estado);
    boolean log (in string copiaRequisicao, in string evento, in Object ref);
+   boolean RegistraDetector(in Object ref);
 };
