@@ -1,3 +1,4 @@
 interface ClienteEventos {
    boolean NovoAlerta(in string evento);
+   boolean TrocaServidor(in Object ref);
 };

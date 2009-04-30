@@ -40,7 +40,7 @@ public class Cliente {
 
     private void InicializaCorba(String[] args) {
         try {
-            cliente = new ClienteEventosImpl();
+            cliente = new ClienteEventosImpl(this);
 
             // Inicializa o ORB
             ORB orb = ORB.init(args, null);
@@ -57,8 +57,7 @@ public class Cliente {
             // É o servidor de nomes que fornece essa referência (resolve)
             org.omg.CORBA.Object o = nc.resolve(nc.to_name("ServicoEventos.corba"));
 
-            // Transforma o objeto CORBA genérico num objeto CORBA ServicoEventos
-            this.servico = ServicoEventosHelper.narrow(o);
+            this.DefineServidor(o);
 
             cliente_corba = poa.servant_to_reference(cliente);
 
@@ -66,6 +65,16 @@ public class Cliente {
             e.printStackTrace();
             this.servico = null;
         }
+    }
+
+    /**
+     * Define a referência do ServicoEventos a partir de um objeto CORBA
+     * @param servidor
+     */
+    public void DefineServidor(org.omg.CORBA.Object servidor) {
+        
+        // Transforma o objeto CORBA genérico num objeto CORBA ServicoEventos
+        this.servico = ServicoEventosHelper.narrow(servidor);
     }
 
     public void MenuPrincipal() throws IOException {
@@ -117,7 +126,7 @@ public class Cliente {
 
         System.out.println("Aguardando evento qualquer...");
         StringHolder eventoQualquer = new StringHolder();
-        while(!this.servico.obterEventoQualquer(eventoQualquer)) {
+        while (!this.servico.obterEventoQualquer(eventoQualquer)) {
             System.out.println("falhou... tentando novamente...");
         }
         String eventoQualquerStr = eventoQualquer.value;
