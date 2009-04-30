@@ -33,7 +33,7 @@ public class _ServicoEventosStub extends org.omg.CORBA.portable.ObjectImpl imple
         try {
             org.omg.CORBA.portable.OutputStream $out = _request("ObterListaEventos", true);
             $in = _invoke($out);
-            lista.value = ServicoEventosPackage.listaEventosHelper.read($in);
+            lista.value = listaEventosHelper.read($in);
             return;
         } catch (org.omg.CORBA.portable.ApplicationException $ex) {
             $in = $ex.getInputStream();
@@ -107,7 +107,7 @@ public class _ServicoEventosStub extends org.omg.CORBA.portable.ObjectImpl imple
         org.omg.CORBA.portable.InputStream $in = null;
         try {
             org.omg.CORBA.portable.OutputStream $out = _request("checkpoint", true);
-            ServicoEventosPackage.arrayDeBytesHelper.write($out, estado);
+            arrayDeBytesHelper.write($out, estado);
             $in = _invoke($out);
             boolean $result = $in.read_boolean();
             return $result;

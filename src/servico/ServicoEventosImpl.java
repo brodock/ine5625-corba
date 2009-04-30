@@ -1,6 +1,5 @@
 package servico;
 
-import ServicoEventosPackage.listaEventosHolder;
 import cliente.ClienteEventos;
 import cliente.ClienteEventosHelper;
 import java.util.ArrayList;

@@ -85,7 +85,7 @@ public abstract class ServicoEventosPOA extends org.omg.PortableServer.Servant
 
             case 5: // ServicoEventos/checkpoint
             {
-                byte estado[] = ServicoEventosPackage.arrayDeBytesHelper.read(in);
+                byte estado[] = arrayDeBytesHelper.read(in);
                 boolean $result = false;
                 $result = this.checkpoint(estado);
                 out = $rh.createReply();
