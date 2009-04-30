@@ -1,8 +1,11 @@
 interface ServicoEventos {
    typedef sequence<string> listaEventos; 
+   typedef sequence<octet> arrayDeBytes;
    boolean MeRegistre(in Object ref, in string evento);
    void ObterListaEventos(out listaEventos lista);
    boolean NovoEvento(in string evento);
    boolean CadastrarEvento(in string evento);
    boolean obterEventoQualquer(out string evento);
+   boolean checkpoint (in arrayDeBytes estado);
+   boolean log (in string copiaRequisicao, in string evento, in Object ref);
 };

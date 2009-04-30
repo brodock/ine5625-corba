@@ -1,5 +1,6 @@
 package servico;
 
+import ServicoEventosPackage.listaEventosHolder;
 import cliente.ClienteEventos;
 import cliente.ClienteEventosHelper;
 import java.util.ArrayList;
@@ -56,7 +57,7 @@ public class ServicoEventosImpl extends ServicoEventosPOA {
      *
      * @param lista
      */
-    public void ObterListaEventos(listaEventosHolder lista) {
+    public void ObterListaEventos(servico.listaEventosHolder lista) {
         String[] lista_eventos = new String[clientes_eventos.size()];
 
         // Recuperar Iterator da chave do hashmap
@@ -157,5 +158,13 @@ public class ServicoEventosImpl extends ServicoEventosPOA {
 
     private void mensagem(String texto) {
         System.out.println(texto);
+    }
+
+    public boolean checkpoint(byte[] estado) {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    public boolean log(String copiaRequisicao, String evento, Object ref) {
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 }
