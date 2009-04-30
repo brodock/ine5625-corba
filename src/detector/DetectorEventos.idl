@@ -1,0 +1,3 @@
+interface DetectorEventos {
+   boolean TrocaServidor(in Object ref);
+};
