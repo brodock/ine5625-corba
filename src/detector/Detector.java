@@ -17,7 +17,7 @@ import servico.*;
 public class Detector {
 
     private ServicoEventos servico;
-    private ArrayList<String> eventos = new ArrayList<String>();
+    private DetectorEventosImpl detector;
 
     /**
      * Inicializa um detector passando parametros de conexão do CORBA
@@ -25,7 +25,13 @@ public class Detector {
      */
     public Detector(String[] args) {
         System.out.println("Bem vindo ao Detector de eventos aleatórios");
+
         InicializaCorba(args);
+
+        // Iniciar um objeto detector que receberá a referência corba do servidor, 
+        // quando este for substituido pelo backup
+        this.detector = new DetectorEventosImpl(this);
+
         try {
             MenuPrincipal();
         } catch (IOException ex) {
@@ -48,13 +54,22 @@ public class Detector {
             // É o servidor de nomes que fornece essa referência (resolve)
             org.omg.CORBA.Object o = nc.resolve(nc.to_name("ServicoEventos.corba"));
 
-            // Transforma o objeto CORBA genérico num objeto CORBA ServicoEventos
-            this.servico = ServicoEventosHelper.narrow(o);
+            this.DefineServidor(o);
 
         } catch (Exception e) {
             e.printStackTrace();
             this.servico = null;
         }
+    }
+
+    /**
+     * Define a referência do ServicoEventos a partir de um objeto CORBA
+     * @param servidor
+     */
+    public void DefineServidor(org.omg.CORBA.Object servidor) {
+
+        // Transforma o objeto CORBA genérico num objeto CORBA ServicoEventos
+        this.servico = ServicoEventosHelper.narrow(servidor);
     }
 
     public void MenuPrincipal() throws IOException {

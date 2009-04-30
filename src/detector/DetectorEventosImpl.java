@@ -10,8 +10,15 @@ import org.omg.CORBA.Object;
  */
 public class DetectorEventosImpl extends DetectorEventosPOA {
 
+    private Detector detector;
+
+    public DetectorEventosImpl(Detector detector) {
+        this.detector = detector;
+    }
+
     public boolean TrocaServidor(Object ref) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        this.detector.DefineServidor(ref);
+        return true;
     }
 
 }
