@@ -14,6 +14,11 @@ public class ClienteEventosImpl extends ClienteEventosPOA {
         this.cliente = cliente;
     }
 
+    /**
+     * Recebe um novo alerta disparado pelo Serviço Eventos
+     * @param evento
+     * @return
+     */
     public boolean NovoAlerta(String evento) {
 
         System.out.println("["+evento+"] recebido");
