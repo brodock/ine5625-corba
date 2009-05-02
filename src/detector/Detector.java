@@ -1,9 +1,9 @@
 package detector;
 
+import com.sun.corba.se.impl.logging.ORBUtilSystemException;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.omg.CosNaming.NamingContextExt;
@@ -48,15 +48,22 @@ public class Detector {
 
             // Obtém a referência do servidor de nomes (NameService)
             // Essa tarefa é realizada pelo ORB (resolve_initial_references)
-            NamingContextExt nc = NamingContextExtHelper.narrow(orb.resolve_initial_references("NameService"));
-
+            org.omg.CORBA.Object ns = orb.resolve_initial_references("NameService");
+            NamingContextExt nc = NamingContextExtHelper.narrow(ns);
+            
             // Obtém o objeto CORBA (genérico) do servidor HelloWorld
             // É o servidor de nomes que fornece essa referência (resolve)
             org.omg.CORBA.Object o = nc.resolve(nc.to_name("ServicoEventos.corba"));
 
             this.DefineServidor(o);
+        } catch (org.omg.CORBA.COMM_FAILURE e) {
 
+            System.out.println("Falha ao conectar com o servidor CORBA ("+String.valueOf(e.minor)+")");
+            System.out.println(e);
+            
+            this.servico = null;
         } catch (Exception e) {
+
             e.printStackTrace();
             this.servico = null;
         }
