@@ -23,6 +23,11 @@ public class ServicoEventosImpl extends ServicoEventosPOA {
     private ArrayList<Object> detectores = new ArrayList<Object>();
     private String evt;
     private int count_evt = 0;
+    private Servidor servidor;
+
+    public ServicoEventosImpl(Servidor servidor) {
+        this.servidor = servidor;
+    }
 
     /**
      * Registra um objeto cliente para receber Eventos do tipo
@@ -100,7 +105,7 @@ public class ServicoEventosImpl extends ServicoEventosPOA {
                     Thread.sleep(100L);
                 } catch (InterruptedException ex) {
                     Logger.getLogger(ServicoEventosImpl.class.getName()).log(Level.SEVERE, null, ex);
-                    mensagem("Erro ao disparar evento: " + evento );
+                    mensagem("Erro ao disparar evento: " + evento);
                     return false;
                 }
                 ClienteEventos cliente = ClienteEventosHelper.narrow(cli);
