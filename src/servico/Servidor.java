@@ -15,22 +15,30 @@ import org.omg.PortableServer.*;
 public class Servidor {
 
     private boolean backup = false;
-    private Object servidor_corba;
+    private Object servico_corba_obj;
+    private ServicoEventos servidor_backup;
     private NamingContextExt nc;
 
     public boolean isBackup() {
         return backup;
     }
 
-    public void DefineServidor(boolean backup) throws NotFound, CannotProceed, InvalidName {
+    /**
+     * Registra o objeto ServicoEventos no servidor de nomes
+     * @param backup Este servidor é um servidor de backup?
+     * @throws org.omg.CosNaming.NamingContextPackage.NotFound
+     * @throws org.omg.CosNaming.NamingContextPackage.CannotProceed
+     * @throws org.omg.CosNaming.NamingContextPackage.InvalidName
+     */
+    public void RegistraServico(boolean backup) throws NotFound, CannotProceed, InvalidName {
 
 
         // Registra a referência objCORBA no servidor de nomes usando o bind (pode ser tb com rebind)
         if (backup) {
-            nc.rebind(nc.to_name("ServicoEventosBackup.corba"), servidor_corba);
+            nc.rebind(nc.to_name("ServicoEventosBackup.corba"), servico_corba_obj);
             System.out.println("Carregado como servidor de BACKUP");
         } else {
-            nc.rebind(nc.to_name("ServicoEventos.corba"), servidor_corba);
+            nc.rebind(nc.to_name("ServicoEventos.corba"), servico_corba_obj);
             System.out.println("Carregado como servidor PRINCIPAL");
         }
 
@@ -65,13 +73,16 @@ public class Servidor {
             ServicoEventosImpl servicoEventos = new ServicoEventosImpl(this);
 
             // Transforma o objeto java ServicoEventosImpl (servicoEventos) num objeto CORBA genérico (objCORBA)
-            this.servidor_corba = poa.servant_to_reference(servicoEventos);
+            this.servico_corba_obj = poa.servant_to_reference(servicoEventos);
 
             // Obtém a referência (endereço) do servidor de nomes (NameService)
             // Essa tarefa é realizada pelo ORB (orb.resolve_initial_references)
             this.nc = NamingContextExtHelper.narrow(orb.resolve_initial_references("NameService"));
 
-            DefineServidor(backup);
+            RegistraServico(backup);
+
+            if (!backup)
+                LocalizaServidorBackup();
 
             orb.run();
         } catch (Exception e) {
@@ -82,5 +93,18 @@ public class Servidor {
     public static void main(String[] args) {
         Servidor servidor = new Servidor(args);
         System.exit(0);
+    }
+
+    /**
+     * Só deve ser chamado se tivermos certeza que essa instância é um servidor de backup
+     * 
+     * @throws org.omg.CosNaming.NamingContextPackage.InvalidName
+     * @throws org.omg.CosNaming.NamingContextPackage.CannotProceed
+     * @throws org.omg.CosNaming.NamingContextPackage.NotFound
+     */
+    private void LocalizaServidorBackup() throws InvalidName, CannotProceed, NotFound {
+
+        org.omg.CORBA.Object servidor = nc.resolve(nc.to_name("ServicoEventosBackup.corba"));
+        this.servidor_backup = ServicoEventosHelper.narrow(servidor);
     }
 }
