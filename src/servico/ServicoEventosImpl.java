@@ -177,7 +177,7 @@ public class ServicoEventosImpl extends ServicoEventosPOA {
      * @return
      */
     public boolean checkpoint(byte[] estado) {
-        
+
         java.lang.Object obj = ObjectUtils.deserialize(estado);
         HashMap<String, ArrayList<Object>> hashmap = (HashMap<String, ArrayList<Object>>) obj;
 
@@ -198,8 +198,28 @@ public class ServicoEventosImpl extends ServicoEventosPOA {
      * @return true caso positivo ou false caso tenha ocorrido algum erro
      */
     public boolean log(String copiaRequisicao, String evento, Object ref) {
+        System.out.println("Log recebido: "+copiaRequisicao+" "+evento+" ");
         Log log = new Log(copiaRequisicao, evento, ref);
         return this.lista_log.add(log);
+    }
+
+    /**
+     * Utilizado pelo servidor principal, para enviar o log para o servidor backup.
+     *
+     *
+     * @param copiaRequisicao
+     * @param evento
+     * @param ref
+     */
+    private void addToLog(String copiaRequisicao, String evento, Object ref) {
+
+        boolean fail = true;
+        while (fail) {
+            fail = this.servidor.getServidorBackup().log(copiaRequisicao, evento, ref);
+            if (fail) {
+                System.out.println("Ocorreu uma falha ao tentar enviar o log");
+            }
+        }
     }
 
     public boolean RegistraDetector(Object ref) {

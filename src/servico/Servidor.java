@@ -16,11 +16,15 @@ public class Servidor {
 
     private boolean backup = false;
     private Object servico_corba_obj;
-    private ServicoEventos servidor_backup;
+    private ServicoEventos servidorBackup;
     private NamingContextExt nc;
 
     public boolean isBackup() {
         return backup;
+    }
+
+    public ServicoEventos getServidorBackup() {
+        return servidorBackup;
     }
 
     /**
@@ -105,6 +109,6 @@ public class Servidor {
     private void LocalizaServidorBackup() throws InvalidName, CannotProceed, NotFound {
 
         org.omg.CORBA.Object servidor = nc.resolve(nc.to_name("ServicoEventosBackup.corba"));
-        this.servidor_backup = ServicoEventosHelper.narrow(servidor);
+        this.servidorBackup = ServicoEventosHelper.narrow(servidor);
     }
 }
