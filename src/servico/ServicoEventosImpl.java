@@ -2,6 +2,8 @@ package servico;
 
 import cliente.ClienteEventos;
 import cliente.ClienteEventosHelper;
+import com.sun.corba.se.impl.logging.UtilSystemException;
+import com.sun.jndi.toolkit.corba.CorbaUtils;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -12,6 +14,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.omg.CORBA.Object;
 import org.omg.CORBA.StringHolder;
+import util.Log;
+import util.ObjectUtils;
 
 /**
  *
@@ -21,6 +25,7 @@ public class ServicoEventosImpl extends ServicoEventosPOA {
 
     private HashMap<String, ArrayList<Object>> clientes_eventos = new HashMap<String, ArrayList<Object>>();
     private ArrayList<Object> detectores = new ArrayList<Object>();
+    private ArrayList<Log> lista_log = new ArrayList<Log>();
     private String evt;
     private int count_evt = 0;
     private Servidor servidor;
@@ -165,12 +170,36 @@ public class ServicoEventosImpl extends ServicoEventosPOA {
         System.out.println(texto);
     }
 
+    /**
+     * Quando receber um estado, substitui a lista com eventos e clientes existentes
+     * pela lista fornecida no estado. O estado é um array de bytes, e precisa ser deserializado.
+     * @param estado
+     * @return
+     */
     public boolean checkpoint(byte[] estado) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        
+        java.lang.Object obj = ObjectUtils.deserialize(estado);
+        HashMap<String, ArrayList<Object>> hashmap = (HashMap<String, ArrayList<Object>>) obj;
+
+        if (hashmap != null) {
+            this.clientes_eventos = hashmap;
+            this.lista_log = new ArrayList<Log>();
+            return true;
+        } else {
+            return false;
+        }
     }
 
+    /**
+     * Adiciona os registros referentes a uma requisição na lista de logs
+     * @param copiaRequisicao
+     * @param evento
+     * @param ref
+     * @return true caso positivo ou false caso tenha ocorrido algum erro
+     */
     public boolean log(String copiaRequisicao, String evento, Object ref) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        Log log = new Log(copiaRequisicao, evento, ref);
+        return this.lista_log.add(log);
     }
 
     public boolean RegistraDetector(Object ref) {
