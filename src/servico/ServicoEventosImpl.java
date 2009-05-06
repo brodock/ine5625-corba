@@ -2,8 +2,6 @@ package servico;
 
 import cliente.ClienteEventos;
 import cliente.ClienteEventosHelper;
-import com.sun.corba.se.impl.logging.UtilSystemException;
-import com.sun.jndi.toolkit.corba.CorbaUtils;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -52,6 +50,7 @@ public class ServicoEventosImpl extends ServicoEventosPOA {
                 return false;
             } else {
                 mensagem("Registrando um cliente para evento: " + evento);
+                this.addToLog("MeRegistre", evento, ref);
                 return lista.add(ref);
             }
 
@@ -137,6 +136,7 @@ public class ServicoEventosImpl extends ServicoEventosPOA {
         if (!this.clientes_eventos.containsKey(evento)) {
             this.clientes_eventos.put(evento, new ArrayList(5));
             mensagem("Evento \"" + evento + "\" cadastrado!");
+            this.addToLog("CadastrarEvento", evento, null);
             return true;
         }
         mensagem("Impossivel cadastrar evento: " + evento + " pois o mesmo ja deve estar cadastrado!");
