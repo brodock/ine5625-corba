@@ -198,7 +198,7 @@ public class ServicoEventosImpl extends ServicoEventosPOA {
      * @return true caso positivo ou false caso tenha ocorrido algum erro
      */
     public boolean log(String copiaRequisicao, String evento, Object ref) {
-        System.out.println("Log recebido: "+copiaRequisicao+" "+evento+" ");
+        System.out.println("Log recebido: " + copiaRequisicao + " " + evento + " ");
         Log log = new Log(copiaRequisicao, evento, ref);
         return this.lista_log.add(log);
     }
@@ -206,19 +206,16 @@ public class ServicoEventosImpl extends ServicoEventosPOA {
     /**
      * Utilizado pelo servidor principal, para enviar o log para o servidor backup.
      *
-     *
      * @param copiaRequisicao
      * @param evento
      * @param ref
      */
     private void addToLog(String copiaRequisicao, String evento, Object ref) {
 
-        boolean fail = true;
-        while (fail) {
-            fail = this.servidor.getServidorBackup().log(copiaRequisicao, evento, ref);
-            if (fail) {
-                System.out.println("Ocorreu uma falha ao tentar enviar o log");
-            }
+        try {
+            this.servidor.getServidorBackup().log(copiaRequisicao, evento, ref);
+        } catch (Exception ex) {
+            System.out.println("Ocorreu uma falha ao tentar enviar o log.");
         }
     }
 

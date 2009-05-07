@@ -4,6 +4,7 @@ import detector.Detector;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.net.ConnectException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.omg.CORBA.ORB;
@@ -75,6 +76,7 @@ public class Cliente {
         
         // Transforma o objeto CORBA genérico num objeto CORBA ServicoEventos
         this.servico = ServicoEventosHelper.narrow(servidor);
+        System.out.println("Novo servidor encontrado...");
     }
 
     public void MenuPrincipal() throws IOException {
@@ -89,11 +91,11 @@ public class Cliente {
             String comando = stdin.readLine();
 
             if (comando.startsWith("1")) {
-                RegistrarEvento();
+                registrarEvento();
             } else if (comando.startsWith("2")) {
-                ReceberEventoQualquer();
+                receberEventoQualquer();
             } else if (comando.startsWith("3")) {
-                MostrarListaEventos();
+                mostrarListaEventos();
             } else {
                 msgOpcaoInvalida();
             }
@@ -105,7 +107,7 @@ public class Cliente {
     /**
      * Mostra uma lista com eventos disponíveis e depois volta ao menu principal
      */
-    private void MostrarListaEventos() {
+    private void mostrarListaEventos() {
         System.out.println("Lista de eventos disponiveis: ");
         listaEventosHolder listaEventos = new listaEventosHolder();
         servico.ObterListaEventos(listaEventos);
@@ -121,8 +123,7 @@ public class Cliente {
     /**
      * Recebe um evento qualquer disparado e depois volta ao menu principal
      */
-    @SuppressWarnings("empty-statement")
-    private void ReceberEventoQualquer() {
+    private void receberEventoQualquer() {
 
         System.out.println("Aguardando evento qualquer...");
         StringHolder eventoQualquer = new StringHolder();
@@ -138,12 +139,16 @@ public class Cliente {
      * Registra para receber informações quando um determinado evento for disparado
      * e depois retorna ao menu principal
      */
-    private void RegistrarEvento() throws IOException {
+    private void registrarEvento() throws IOException {
         System.out.println("Digite o evento que voce quer receber: ");
         BufferedReader stdin = new BufferedReader(new InputStreamReader(System.in));
 
         String comando = stdin.readLine();
+        try {
         servico.MeRegistre(cliente_corba, comando);
+        } catch (Exception e) {
+            conexaoFalhou();
+        }
     }
 
     /**
@@ -158,5 +163,10 @@ public class Cliente {
         // Carrega o cliente e o resto é com ele!!!
         Cliente cliente = new Cliente(args);
         System.exit(0);
+    }
+
+    private void conexaoFalhou() {
+        System.out.println("Conexao falhou...");
+        System.out.println("Aguardando servidor...");
     }
 }

@@ -1,3 +1,0 @@
-interface ClienteEventos {
-   boolean NovoAlerta(in string evento);
-};
