@@ -4,6 +4,8 @@ package servico;
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.omg.CORBA.*;
 import org.omg.CORBA.Object;
 import org.omg.CosNaming.*;
@@ -24,6 +26,20 @@ public class Servidor {
     }
 
     public ServicoEventos getServidorBackup() {
+        while (servidorBackup == null) {
+            try {
+                System.out.println("Procurando servidor de backup...");
+                LocalizaServidorBackup();
+                System.out.println("Servidor backup, localizado!");
+            } catch (Exception ex) {
+                Logger.getLogger(Servidor.class.getName()).log(Level.SEVERE, null, ex);
+                try {
+                    wait(1000L);
+                } catch (InterruptedException ex1) {
+                    Logger.getLogger(Servidor.class.getName()).log(Level.SEVERE, null, ex1);
+                }
+            }
+        }
         return servidorBackup;
     }
 
@@ -64,6 +80,29 @@ public class Servidor {
 
     }
 
+    /**
+     * Transforma o serviço em execução no serviço principal
+     */
+    public void virarServidorPrincipal() {
+        System.out.println("Tentando virar servidor PRINCIPAL...");
+        this.backup = false;
+        try {
+            this.RegistraServico(this.backup);
+        } catch (Exception ex) {
+            Logger.getLogger(Servidor.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+    }
+
+    public static void main(String[] args) {
+        Servidor servidor = new Servidor(args);
+        System.exit(0);
+    }
+
+    /**
+     * Inicializa o ORB e objetos corba, registra o servidor no servico de nomes
+     * @param args Parametros de inicialização do ORB
+     */
     private void InicializaCorba(String[] args) {
         // Inicializa o ORB
         ORB orb = ORB.init(args, null);
@@ -85,22 +124,14 @@ public class Servidor {
 
             RegistraServico(backup);
 
-            if (!backup)
-                LocalizaServidorBackup();
-
             orb.run();
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    public static void main(String[] args) {
-        Servidor servidor = new Servidor(args);
-        System.exit(0);
-    }
-
     /**
-     * Só deve ser chamado se tivermos certeza que essa instância é um servidor de backup
+     * Procura o servidor de backup e registra ele para utilização posterior
      * 
      * @throws org.omg.CosNaming.NamingContextPackage.InvalidName
      * @throws org.omg.CosNaming.NamingContextPackage.CannotProceed

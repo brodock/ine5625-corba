@@ -14,6 +14,8 @@ import org.omg.CORBA.Object;
 import org.omg.CORBA.StringHolder;
 import util.Log;
 import util.ObjectUtils;
+import util.PingThread;
+import util.TimeoutThread;
 
 /**
  *
@@ -21,15 +23,29 @@ import util.ObjectUtils;
  */
 public class ServicoEventosImpl extends ServicoEventosPOA {
 
+    // Estrutura de dados
     private HashMap<String, ArrayList<Object>> clientes_eventos = new HashMap<String, ArrayList<Object>>();
     private ArrayList<Object> detectores = new ArrayList<Object>();
     private ArrayList<Log> lista_log = new ArrayList<Log>();
+    // Lidar com caso de disparar evento qualquer
     private String evt;
     private int count_evt = 0;
-    private Servidor servidor;
+    // Instancia da classe Servidor (responsável pela inicialização do corba e localizar servidor de backup)
+    public Servidor servidor;
+    // Thread responsaveis pelo Timeout e Checkpoint
+    private Thread pingThread;
+    private TimeoutThread timeoutThread;
 
     public ServicoEventosImpl(Servidor servidor) {
         this.servidor = servidor;
+
+        if (this.servidor.isBackup()) {
+            this.timeoutThread = new TimeoutThread(this);
+            this.timeoutThread.start();
+        } else {
+            this.pingThread = new PingThread(this);
+            this.pingThread.start();
+        }
     }
 
     /**
@@ -47,6 +63,7 @@ public class ServicoEventosImpl extends ServicoEventosPOA {
             ArrayList lista = (ArrayList) this.clientes_eventos.get(evento);
 
             if (lista.contains(ref)) {
+                mensagem("Cliente já está registrado para evento: " + evento);
                 return false;
             } else {
                 mensagem("Registrando um cliente para evento: " + evento);
@@ -55,6 +72,7 @@ public class ServicoEventosImpl extends ServicoEventosPOA {
             }
 
         }
+        mensagem("Cliente tentou se registrar para evento inexistente: " + evento);
         return false;
 
     }
@@ -178,6 +196,7 @@ public class ServicoEventosImpl extends ServicoEventosPOA {
      */
     public boolean checkpoint(byte[] estado) {
 
+        this.timeoutThread.Ping();
         java.lang.Object obj = ObjectUtils.deserialize(estado);
         HashMap<String, ArrayList<Object>> hashmap = (HashMap<String, ArrayList<Object>>) obj;
 
@@ -186,6 +205,7 @@ public class ServicoEventosImpl extends ServicoEventosPOA {
             this.lista_log = new ArrayList<Log>();
             return true;
         } else {
+            mensagem("Falha no checkpoint recebido...");
             return false;
         }
     }
@@ -204,6 +224,23 @@ public class ServicoEventosImpl extends ServicoEventosPOA {
     }
 
     /**
+     * Adiciona um detector a lista de detectores registrados
+     * @param ref Referência do Detector
+     * @return true se conseguir ou false se falhar
+     */
+    public boolean RegistraDetector(Object ref) {
+        return this.detectores.add(ref);
+    }
+
+    /**
+     * Envia o checkpoint para o servidor de backup
+     */
+    public void enviarCheckpoint() {
+        byte[] estado = ObjectUtils.serialize(this.clientes_eventos);
+        this.servidor.getServidorBackup().checkpoint(estado);
+    }
+
+    /**
      * Utilizado pelo servidor principal, para enviar o log para o servidor backup.
      *
      * @param copiaRequisicao
@@ -217,10 +254,5 @@ public class ServicoEventosImpl extends ServicoEventosPOA {
         } catch (Exception ex) {
             System.out.println("Ocorreu uma falha ao tentar enviar o log.");
         }
-    }
-
-    public boolean RegistraDetector(Object ref) {
-        this.detectores.add(ref);
-        return true;
     }
 }
