@@ -116,7 +116,11 @@ public class Detector {
         BufferedReader stdin = new BufferedReader(new InputStreamReader(System.in));
         String comando = stdin.readLine();
 
+        try {
         this.servico.NovoEvento(comando);
+        } catch (Exception e) {
+            System.out.println("Envio falhou...");
+        }
     }
 
     private void DefinirEvento() throws IOException {
@@ -125,6 +129,10 @@ public class Detector {
         BufferedReader stdin = new BufferedReader(new InputStreamReader(System.in));
         String comando = stdin.readLine();
 
+        try {
         this.servico.CadastrarEvento(comando);
+        } catch (Exception e) {
+            System.out.println("Envio falhou...");
+        }
     }
 }
