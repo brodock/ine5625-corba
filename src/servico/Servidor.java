@@ -1,9 +1,6 @@
 package servico;
 
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
+
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.omg.CORBA.*;
@@ -18,29 +15,10 @@ public class Servidor {
 
     private boolean backup = false;
     private Object servico_corba_obj;
-    private ServicoEventos servidorBackup;
     private NamingContextExt nc;
 
     public boolean isBackup() {
         return backup;
-    }
-
-    public ServicoEventos getServidorBackup() {
-        while (servidorBackup == null) {
-            try {
-                System.out.println("Procurando servidor de backup...");
-                LocalizaServidorBackup();
-                System.out.println("Servidor backup, localizado!");
-            } catch (Exception ex) {
-                Logger.getLogger(Servidor.class.getName()).log(Level.SEVERE, null, ex);
-                try {
-                    wait(1000L);
-                } catch (InterruptedException ex1) {
-                    Logger.getLogger(Servidor.class.getName()).log(Level.SEVERE, null, ex1);
-                }
-            }
-        }
-        return servidorBackup;
     }
 
     /**
@@ -112,15 +90,15 @@ public class Servidor {
             POA poa = POAHelper.narrow(orb.resolve_initial_references("RootPOA"));
             poa.the_POAManager().activate();
 
-            // Instancia um objeto da classe GoodDayImpl
-            ServicoEventosImpl servicoEventos = new ServicoEventosImpl(this);
-
-            // Transforma o objeto java ServicoEventosImpl (servicoEventos) num objeto CORBA genérico (objCORBA)
-            this.servico_corba_obj = poa.servant_to_reference(servicoEventos);
-
             // Obtém a referência (endereço) do servidor de nomes (NameService)
             // Essa tarefa é realizada pelo ORB (orb.resolve_initial_references)
             this.nc = NamingContextExtHelper.narrow(orb.resolve_initial_references("NameService"));
+
+            // Instancia um objeto da classe GoodDayImpl
+            ServicoEventosImpl servicoEventos = new ServicoEventosImpl(this, poa, nc);
+
+            // Transforma o objeto java ServicoEventosImpl (servicoEventos) num objeto CORBA genérico (objCORBA)
+            this.servico_corba_obj = poa.servant_to_reference(servicoEventos);
 
             RegistraServico(backup);
 
@@ -128,18 +106,5 @@ public class Servidor {
         } catch (Exception e) {
             e.printStackTrace();
         }
-    }
-
-    /**
-     * Procura o servidor de backup e registra ele para utilização posterior
-     * 
-     * @throws org.omg.CosNaming.NamingContextPackage.InvalidName
-     * @throws org.omg.CosNaming.NamingContextPackage.CannotProceed
-     * @throws org.omg.CosNaming.NamingContextPackage.NotFound
-     */
-    private void LocalizaServidorBackup() throws InvalidName, CannotProceed, NotFound {
-
-        org.omg.CORBA.Object servidor = nc.resolve(nc.to_name("ServicoEventosBackup.corba"));
-        this.servidorBackup = ServicoEventosHelper.narrow(servidor);
     }
 }

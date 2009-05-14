@@ -1,7 +1,4 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
+
 package util;
 
 import java.util.logging.Level;
@@ -21,6 +18,7 @@ public class TimeoutThread extends Thread {
 
     public TimeoutThread(ServicoEventosImpl servico) {
         this.servico = servico;
+        System.out.println("Inicializando timeout thread");
     }
 
     /**

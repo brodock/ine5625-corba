@@ -12,9 +12,12 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.omg.CORBA.Object;
 import org.omg.CORBA.StringHolder;
+import org.omg.CosNaming.NamingContextExt;
+import org.omg.PortableServer.POA;
 import util.Log;
 import util.ObjectUtils;
 import util.PingThread;
+import util.Save;
 import util.TimeoutThread;
 
 /**
@@ -35,9 +38,16 @@ public class ServicoEventosImpl extends ServicoEventosPOA {
     // Thread responsaveis pelo Timeout e Checkpoint
     private Thread pingThread;
     private TimeoutThread timeoutThread;
+    // CORBA
+    private POA poa;
+    private NamingContextExt nc;
+    // Backup
+    private ServicoEventos servidorBackup;
 
-    public ServicoEventosImpl(Servidor servidor) {
+    public ServicoEventosImpl(Servidor servidor, POA poa, NamingContextExt nc) {
         this.servidor = servidor;
+        this.poa = poa;
+        this.nc = nc;
 
         if (this.servidor.isBackup()) {
             this.timeoutThread = new TimeoutThread(this);
@@ -198,10 +208,11 @@ public class ServicoEventosImpl extends ServicoEventosPOA {
 
         this.timeoutThread.Ping();
         java.lang.Object obj = ObjectUtils.deserialize(estado);
-        HashMap<String, ArrayList<Object>> hashmap = (HashMap<String, ArrayList<Object>>) obj;
+        Save save = (Save) obj;
 
-        if (hashmap != null) {
-            this.clientes_eventos = hashmap;
+        if (save != null && save.getHashmap() != null) {
+            this.clientes_eventos = save.getHashmap();
+            this.detectores = save.getDetectores();
             this.lista_log = new ArrayList<Log>();
             return true;
         } else {
@@ -236,8 +247,48 @@ public class ServicoEventosImpl extends ServicoEventosPOA {
      * Envia o checkpoint para o servidor de backup
      */
     public void enviarCheckpoint() {
-        byte[] estado = ObjectUtils.serialize(this.clientes_eventos);
-        this.servidor.getServidorBackup().checkpoint(estado);
+        Save save = new Save();
+        save.setHashmap(this.clientes_eventos);
+        save.setDetectores(this.detectores);
+        byte[] estado = ObjectUtils.serialize(save);
+        try {
+            ServicoEventos bkp = getServidorBackup();
+            bkp.checkpoint(estado);
+        } catch (Exception ex) {
+            this.servidorBackup = null;
+            System.out.println("Envio de checkout falhou...");
+        }
+    }
+
+    private ServicoEventos getServidorBackup() {
+        while (servidorBackup == null) {
+            try {
+                System.out.println("Procurando servidor de backup...");
+                LocalizaServidorBackup();
+                System.out.println("Servidor backup, localizado!");
+            } catch (Exception ex) {
+                System.out.println("não encontrei...");
+                try {
+                    wait(1000L);
+                } catch (InterruptedException ex1) {
+                    Logger.getLogger(Servidor.class.getName()).log(Level.SEVERE, null, ex1);
+                }
+            }
+        }
+        return servidorBackup;
+    }
+
+    /**
+     * Procura o servidor de backup e registra ele para utilização posterior
+     *
+     * @throws org.omg.CosNaming.NamingContextPackage.InvalidName
+     * @throws org.omg.CosNaming.NamingContextPackage.CannotProceed
+     * @throws org.omg.CosNaming.NamingContextPackage.NotFound
+     */
+    private void LocalizaServidorBackup() throws Exception {
+
+        org.omg.CORBA.Object server = nc.resolve(nc.to_name("ServicoEventosBackup.corba"));
+        this.servidorBackup = ServicoEventosHelper.narrow(server);
     }
 
     /**
@@ -250,7 +301,7 @@ public class ServicoEventosImpl extends ServicoEventosPOA {
     private void addToLog(String copiaRequisicao, String evento, Object ref) {
 
         try {
-            this.servidor.getServidorBackup().log(copiaRequisicao, evento, ref);
+            this.getServidorBackup().log(copiaRequisicao, evento, ref);
         } catch (Exception ex) {
             System.out.println("Ocorreu uma falha ao tentar enviar o log.");
         }

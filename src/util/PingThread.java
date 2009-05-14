@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package util;
 
 import java.util.logging.Level;
@@ -18,16 +14,19 @@ public class PingThread extends Thread {
 
     public PingThread(ServicoEventosImpl servico) {
         this.servico = servico;
+        System.out.println("Inicializando ping thread!");
     }
 
     @Override
     public void run() {
-        while (this.servico.servidor.isBackup()) {
-            this.servico.enviarCheckpoint();
-            try {
-                wait(3000L);
-            } catch (InterruptedException ex) {
-                Logger.getLogger(ServicoEventosImpl.class.getName()).log(Level.SEVERE, null, ex);
+        synchronized (this) {
+            while (!this.servico.servidor.isBackup()) {
+                this.servico.enviarCheckpoint();
+                try {
+                    wait(3000L);
+                } catch (InterruptedException ex) {
+                    Logger.getLogger(ServicoEventosImpl.class.getName()).log(Level.SEVERE, null, ex);
+                }
             }
         }
     }
