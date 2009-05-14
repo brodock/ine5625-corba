@@ -41,6 +41,7 @@ public class ObjectUtils {
             ObjectOutputStream oos = new ObjectOutputStream(baos);
             oos.writeObject(o);
             oos.flush();
+            oos.close();
             return baos.toByteArray();
         } catch (IOException ex) {
             ex.printStackTrace();
