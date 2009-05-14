@@ -287,6 +287,9 @@ public class ServicoEventosImpl extends ServicoEventosPOA {
             // Avisa detectores
             avisaDetectores();
 
+            // Avisa clientes
+            avisaClientes();
+
             // Altera as threads
             this.timeoutThread = null;
             this.pingThread = new PingThread(this);
@@ -383,6 +386,38 @@ public class ServicoEventosImpl extends ServicoEventosPOA {
 
             } catch (Exception e) {
                 mensagem("Avisar os detectores falhou...");
+            }
+        }
+    }
+
+    private void avisaClientes() {
+        if (clientes_eventos.isEmpty()) {
+            mensagem("Nenhum cliente inscrito...");
+        } else {
+            mensagem("Avisando clientes...");
+
+            ArrayList<Object> clientes = new ArrayList<Object>();
+
+            // Recuperar Iterator da chave do hashmap
+            Set<Entry<String, ArrayList<Object>>> set = clientes_eventos.entrySet();
+            Iterator iter = set.iterator();
+
+            // Pegar cada item do valor do hashmap e jogar para o arraylist de clientes
+            while (iter.hasNext()) {
+                Map.Entry entry = (Map.Entry) iter.next();
+                clientes.addAll((ArrayList<Object>) entry.getValue());
+            }
+
+            try {
+                // Carrega o objeto corba
+                org.omg.CORBA.Object server = poa.servant_to_reference(this);
+
+                for (Object object : clientes) {
+                    ClienteEventos cliente = ClienteEventosHelper.narrow(object);
+                    cliente.TrocaServidor(server);
+                }
+            } catch (Exception e) {
+                mensagem("Avisar os clientes falhou...");
             }
         }
     }
