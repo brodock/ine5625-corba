@@ -20,10 +20,10 @@ public class PingThread extends Thread {
     @Override
     public void run() {
         synchronized (this) {
-            while (!this.servico.servidor.isBackup()) {
+            while (!this.servico.isBackup()) {
                 this.servico.enviarCheckpoint();
                 try {
-                    wait(3000L);
+                    wait(5000L);
                 } catch (InterruptedException ex) {
                     Logger.getLogger(ServicoEventosImpl.class.getName()).log(Level.SEVERE, null, ex);
                 }

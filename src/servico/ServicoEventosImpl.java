@@ -2,6 +2,8 @@ package servico;
 
 import cliente.ClienteEventos;
 import cliente.ClienteEventosHelper;
+import detector.DetectorEventos;
+import detector.DetectorEventosHelper;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -33,8 +35,6 @@ public class ServicoEventosImpl extends ServicoEventosPOA {
     // Lidar com caso de disparar evento qualquer
     private String evt;
     private int count_evt = 0;
-    // Instancia da classe Servidor (responsável pela inicialização do corba e localizar servidor de backup)
-    public Servidor servidor;
     // Thread responsaveis pelo Timeout e Checkpoint
     private Thread pingThread;
     private TimeoutThread timeoutThread;
@@ -43,13 +43,15 @@ public class ServicoEventosImpl extends ServicoEventosPOA {
     private NamingContextExt nc;
     // Backup
     private ServicoEventos servidorBackup;
+    private boolean backup;
 
-    public ServicoEventosImpl(Servidor servidor, POA poa, NamingContextExt nc) {
-        this.servidor = servidor;
+    public ServicoEventosImpl(boolean backup, POA poa, NamingContextExt nc) {
         this.poa = poa;
         this.nc = nc;
+        this.backup = backup;
 
-        if (this.servidor.isBackup()) {
+
+        if (this.backup) {
             this.timeoutThread = new TimeoutThread(this);
             this.timeoutThread.start();
         } else {
@@ -206,6 +208,8 @@ public class ServicoEventosImpl extends ServicoEventosPOA {
      */
     public boolean checkpoint(byte[] estado) {
 
+        mensagem("recebi um checkpoint");
+
         this.timeoutThread.Ping();
         java.lang.Object obj = ObjectUtils.deserialize(estado);
         Save save = (Save) obj;
@@ -260,14 +264,53 @@ public class ServicoEventosImpl extends ServicoEventosPOA {
         }
     }
 
+    /**
+     * Transforma o serviço em execução no serviço principal
+     */
+    public void virarServidorPrincipal() {
+        System.out.println("Tentando virar servidor PRINCIPAL...");
+        this.backup = false;
+
+        try {
+
+            // Carrega o objeto corba
+            org.omg.CORBA.Object servico_corba_obj = poa.servant_to_reference(this);
+
+            // Altera no servidor de nomes
+            nc.rebind(nc.to_name("ServicoEventos.corba"), servico_corba_obj);
+            nc.unbind(nc.to_name("ServicoEventosBackup.corba"));
+            System.out.println("Carregado como servidor PRINCIPAL");
+
+            // Refaz operações de log
+            refazLog();
+
+            // Avisa detectores
+            avisaDetectores();
+
+            // Altera as threads
+            this.timeoutThread = null;
+            this.pingThread = new PingThread(this);
+            this.pingThread.start();
+
+
+        } catch (Exception ex) {
+            Logger.getLogger(Servidor.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+    }
+
+    public boolean isBackup() {
+        return backup;
+    }
+
     private ServicoEventos getServidorBackup() {
         while (servidorBackup == null) {
             try {
-                System.out.println("Procurando servidor de backup...");
+                mensagem("Procurando servidor de backup...");
                 LocalizaServidorBackup();
-                System.out.println("Servidor backup, localizado!");
+                mensagem("Servidor backup, localizado!");
             } catch (Exception ex) {
-                System.out.println("não encontrei...");
+                mensagem("não encontrei...");
                 try {
                     wait(1000L);
                 } catch (InterruptedException ex1) {
@@ -303,7 +346,44 @@ public class ServicoEventosImpl extends ServicoEventosPOA {
         try {
             this.getServidorBackup().log(copiaRequisicao, evento, ref);
         } catch (Exception ex) {
-            System.out.println("Ocorreu uma falha ao tentar enviar o log.");
+            mensagem("Ocorreu uma falha ao tentar enviar o log.");
+        }
+    }
+
+    private void refazLog() {
+        if (this.lista_log.isEmpty()) {
+            mensagem("Log esta limpo...");
+        } else {
+            mensagem("Refazendo operações do log");
+            for (Log log : lista_log) {
+                if (log.getCopiaRequisicao().equals("CadastrarEvento")) {
+                    this.CadastrarEvento(log.getEvento());
+                } else if (log.getCopiaRequisicao().equals("MeRegistre")) {
+                    this.MeRegistre(log.getRef(), log.getEvento());
+                }
+            }
+        }
+    }
+
+    private void avisaDetectores() {
+
+        if (detectores.isEmpty()) {
+            mensagem("Nenhum detector está conectado...");
+        } else {
+            mensagem("Avisando detectores...");
+
+            try {
+                // Carrega o objeto corba
+                org.omg.CORBA.Object server = poa.servant_to_reference(this);
+
+                for (Object d : detectores) {
+                    DetectorEventos detector = DetectorEventosHelper.narrow(d);
+                    detector.TrocaServidor(server);
+                }
+
+            } catch (Exception e) {
+                mensagem("Avisar os detectores falhou...");
+            }
         }
     }
 }

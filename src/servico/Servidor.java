@@ -58,20 +58,6 @@ public class Servidor {
 
     }
 
-    /**
-     * Transforma o serviço em execução no serviço principal
-     */
-    public void virarServidorPrincipal() {
-        System.out.println("Tentando virar servidor PRINCIPAL...");
-        this.backup = false;
-        try {
-            this.RegistraServico(this.backup);
-        } catch (Exception ex) {
-            Logger.getLogger(Servidor.class.getName()).log(Level.SEVERE, null, ex);
-        }
-
-    }
-
     public static void main(String[] args) {
         Servidor servidor = new Servidor(args);
         System.exit(0);
@@ -95,7 +81,7 @@ public class Servidor {
             this.nc = NamingContextExtHelper.narrow(orb.resolve_initial_references("NameService"));
 
             // Instancia um objeto da classe GoodDayImpl
-            ServicoEventosImpl servicoEventos = new ServicoEventosImpl(this, poa, nc);
+            ServicoEventosImpl servicoEventos = new ServicoEventosImpl(this.backup, poa, nc);
 
             // Transforma o objeto java ServicoEventosImpl (servicoEventos) num objeto CORBA genérico (objCORBA)
             this.servico_corba_obj = poa.servant_to_reference(servicoEventos);

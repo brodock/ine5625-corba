@@ -13,7 +13,7 @@ public class TimeoutThread extends Thread {
 
     ServicoEventosImpl servico;
     int count = 0;
-    private static final int MAX_TIMEOUT = 20; // 20 segundos
+    private static final int MAX_TIMEOUT = 10; // 20 segundos
     private static final long TIMEOUT_UNIT = 1000L;
 
     public TimeoutThread(ServicoEventosImpl servico) {
@@ -41,7 +41,7 @@ public class TimeoutThread extends Thread {
             }
         }
 
-        this.servico.servidor.virarServidorPrincipal();
+        this.servico.virarServidorPrincipal();
         }
     }
 }
