@@ -12,6 +12,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.omg.CORBA.ORB;
 import org.omg.CORBA.Object;
 import org.omg.CORBA.StringHolder;
 import org.omg.CosNaming.NamingContextExt;
@@ -41,14 +42,16 @@ public class ServicoEventosImpl extends ServicoEventosPOA {
     // CORBA
     private POA poa;
     private NamingContextExt nc;
+    private ORB orb;
     // Backup
     private ServicoEventos servidorBackup;
     private boolean backup;
 
-    public ServicoEventosImpl(boolean backup, POA poa, NamingContextExt nc) {
+    public ServicoEventosImpl(boolean backup, POA poa, NamingContextExt nc, ORB orb) {
         this.poa = poa;
         this.nc = nc;
         this.backup = backup;
+        this.orb = orb;
 
 
         if (this.backup) {
@@ -214,9 +217,9 @@ public class ServicoEventosImpl extends ServicoEventosPOA {
         java.lang.Object obj = ObjectUtils.deserialize(estado);
         Save save = (Save) obj;
 
-        if (save != null && save.getHashmap() != null) {
-            this.clientes_eventos = save.getHashmap();
-            this.detectores = save.getDetectores();
+        if (save != null && save.getHashmap(orb) != null) {
+            this.clientes_eventos = save.getHashmap(orb);
+            this.detectores = save.getDetectores(orb);
             this.lista_log = new ArrayList<Log>();
             return true;
         } else {
@@ -252,8 +255,8 @@ public class ServicoEventosImpl extends ServicoEventosPOA {
      */
     public void enviarCheckpoint() {
         Save save = new Save();
-        save.setHashmap(this.clientes_eventos);
-        save.setDetectores(this.detectores);
+        save.setHashmap(this.clientes_eventos, orb);
+        save.setDetectores(this.detectores, orb);
         byte[] estado = ObjectUtils.serialize(save);
         try {
             ServicoEventos bkp = getServidorBackup();

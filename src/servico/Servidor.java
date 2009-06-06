@@ -81,7 +81,7 @@ public class Servidor {
             this.nc = NamingContextExtHelper.narrow(orb.resolve_initial_references("NameService"));
 
             // Instancia um objeto da classe GoodDayImpl
-            ServicoEventosImpl servicoEventos = new ServicoEventosImpl(this.backup, poa, nc);
+            ServicoEventosImpl servicoEventos = new ServicoEventosImpl(this.backup, poa, nc, orb);
 
             // Transforma o objeto java ServicoEventosImpl (servicoEventos) num objeto CORBA genérico (objCORBA)
             this.servico_corba_obj = poa.servant_to_reference(servicoEventos);
