@@ -8,6 +8,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.omg.CosNaming.NamingContextExt;
 import org.omg.CosNaming.NamingContextExtHelper;
+import org.omg.PortableServer.POA;
+import org.omg.PortableServer.POAHelper;
 import servico.*;
 
 /**
@@ -17,7 +19,6 @@ import servico.*;
 public class Detector {
 
     private ServicoEventos servico;
-    private DetectorEventosImpl detector;
 
     /**
      * Inicializa um detector passando parametros de conexão do CORBA
@@ -27,10 +28,6 @@ public class Detector {
         System.out.println("Bem vindo ao Detector de eventos aleatórios");
 
         InicializaCorba(args);
-
-        // Iniciar um objeto detector que receberá a referência corba do servidor, 
-        // quando este for substituido pelo backup
-        this.detector = new DetectorEventosImpl(this);
 
         try {
             MenuPrincipal();
@@ -46,21 +43,31 @@ public class Detector {
             // Inicializa o ORB
             org.omg.CORBA.ORB orb = org.omg.CORBA.ORB.init(args, null);
 
+            // Ativa o POA
+            POA poa = POAHelper.narrow(orb.resolve_initial_references("RootPOA"));
+            poa.the_POAManager().activate();
+
             // Obtém a referência do servidor de nomes (NameService)
             // Essa tarefa é realizada pelo ORB (resolve_initial_references)
             org.omg.CORBA.Object ns = orb.resolve_initial_references("NameService");
             NamingContextExt nc = NamingContextExtHelper.narrow(ns);
-            
+
             // Obtém o objeto CORBA (genérico) do servidor HelloWorld
             // É o servidor de nomes que fornece essa referência (resolve)
             org.omg.CORBA.Object o = nc.resolve(nc.to_name("ServicoEventos.corba"));
 
+            // Iniciar um objeto detector que receberá a referência corba do servidor,
+            // quando este for substituido pelo backup
+            DetectorEventosImpl detector = new DetectorEventosImpl(this);
+            org.omg.CORBA.Object detector_corba = poa.servant_to_reference(detector);
+
             this.DefineServidor(o);
+            this.servico.RegistraDetector(detector_corba);
         } catch (org.omg.CORBA.COMM_FAILURE e) {
 
-            System.out.println("Falha ao conectar com o servidor CORBA ("+String.valueOf(e.minor)+")");
+            System.out.println("Falha ao conectar com o servidor CORBA (" + String.valueOf(e.minor) + ")");
             System.out.println(e);
-            
+
             this.servico = null;
         } catch (Exception e) {
 
@@ -117,7 +124,7 @@ public class Detector {
         String comando = stdin.readLine();
 
         try {
-        this.servico.NovoEvento(comando);
+            this.servico.NovoEvento(comando);
         } catch (Exception e) {
             System.out.println("Envio falhou...");
         }
@@ -130,7 +137,7 @@ public class Detector {
         String comando = stdin.readLine();
 
         try {
-        this.servico.CadastrarEvento(comando);
+            this.servico.CadastrarEvento(comando);
         } catch (Exception e) {
             System.out.println("Envio falhou...");
         }

@@ -17,6 +17,7 @@ public class DetectorEventosImpl extends DetectorEventosPOA {
     }
 
     public boolean TrocaServidor(Object ref) {
+        System.out.println("Recebi solicitação para substituir a referência do servidor atual...");
         this.detector.DefineServidor(ref);
         return true;
     }

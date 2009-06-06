@@ -247,6 +247,7 @@ public class ServicoEventosImpl extends ServicoEventosPOA {
      * @return true se conseguir ou false se falhar
      */
     public boolean RegistraDetector(Object ref) {
+        System.out.println("Registrando um detector!");
         return this.detectores.add(ref);
     }
 
